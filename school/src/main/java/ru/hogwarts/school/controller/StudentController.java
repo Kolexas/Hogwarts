@@ -4,11 +4,13 @@ package ru.hogwarts.school.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.StudentService;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/students")
@@ -30,11 +32,24 @@ public class StudentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Student>> findStudents(@RequestParam(required = false) int age) {
-        if (age > 0) {
+    public ResponseEntity<List<Student>> findStudents(@RequestParam(required = false) Integer age, @RequestParam(required = false) Integer min, @RequestParam(required = false) Integer max) {
+        if (age != null) {
             return ResponseEntity.ok(studentService.findByAge(age));
         }
+        if (max != null && min != null) {
+            return ResponseEntity.ok(studentService.findByAgeBetween(min, max));
+        }
         return ResponseEntity.ok(Collections.emptyList());
+    }
+
+    @GetMapping("/{studentId}/faculty")
+    public ResponseEntity<Faculty> getFacultyByStudentId(@PathVariable Long studentId) {
+        try {
+            Faculty faculty = studentService.getFacultyByStudentId(studentId);
+            return ResponseEntity.ok(faculty);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping

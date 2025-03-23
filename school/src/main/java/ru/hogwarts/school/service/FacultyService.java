@@ -1,10 +1,13 @@
 package ru.hogwarts.school.service;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 
 import org.springframework.stereotype.Service;
 import ru.hogwarts.school.model.Faculty;
+import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.FacultyRepository;
 
 @Service
@@ -33,6 +36,16 @@ public class FacultyService {
     }
 
     public List<Faculty> findByColor(String color) {
-        return facultyRepository.findByColor(color);
+        return facultyRepository.findByColorIgnoreCase(color);
+    }
+
+    public List<Faculty> findByName(String name) {
+        return facultyRepository.findByNameIgnoreCase(name);
+    }
+
+    public Collection<Student> getStudentsByFacultyId(Long facultyId) {
+        Faculty faculty = facultyRepository.findById(facultyId)
+                .orElseThrow(() -> new NoSuchElementException("Faculty with id " + facultyId + " not found"));
+        return faculty.getStudents();
     }
 }
