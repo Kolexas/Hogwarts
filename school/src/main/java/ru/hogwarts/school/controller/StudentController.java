@@ -10,7 +10,6 @@ import ru.hogwarts.school.service.StudentService;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/students")
@@ -44,12 +43,11 @@ public class StudentController {
 
     @GetMapping("/{studentId}/faculty")
     public ResponseEntity<Faculty> getFacultyByStudentId(@PathVariable Long studentId) {
-        try {
-            Faculty faculty = studentService.getFacultyByStudentId(studentId);
-            return ResponseEntity.ok(faculty);
-        } catch (NoSuchElementException e) {
+        Faculty faculty = studentService.getFacultyByStudentId(studentId);
+        if (faculty == null) {
             return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.ok(faculty);
     }
 
     @PostMapping
