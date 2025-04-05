@@ -40,7 +40,7 @@ class FacultyControllerTest {
 
     @AfterEach
     void cleanup() {
-        facultyRepository.deleteAllInBatch(); // Очистка базы данных после каждого теста
+        facultyRepository.deleteAllInBatch();
     }
 
     @Test
@@ -160,7 +160,6 @@ class FacultyControllerTest {
         assertNotNull(updatedFaculty);
         assertThat(updatedFaculty.getId()).isEqualTo(createdFaculty.getId());
         assertThat(updatedFaculty.getName()).isEqualTo("Harvard");
-
     }
 
     @Test

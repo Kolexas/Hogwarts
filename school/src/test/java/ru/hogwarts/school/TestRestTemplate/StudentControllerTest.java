@@ -40,7 +40,7 @@ class StudentControllerTest {
 
     @AfterEach
     void cleanup() {
-        studentRepository.deleteAllInBatch(); // Очистка базы данных после каждого теста
+        studentRepository.deleteAllInBatch();
     }
 
     @Test
@@ -93,7 +93,7 @@ class StudentControllerTest {
         restTemplate.postForEntity("http://localhost:" + port + "/students", student_2, Student.class);
         restTemplate.postForEntity("http://localhost:" + port + "/students", student_3, Student.class);
         ResponseEntity<List<Student>> response = restTemplate.exchange(
-                "http://localhost:" + port + "/students?age=20", HttpMethod.GET, null, new ParameterizedTypeReference<List<Student>>() {
+                "http://localhost:" + port + "/students?age=20", HttpMethod.GET, null, new ParameterizedTypeReference<>() {
                 });
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         List<Student> students = response.getBody();
@@ -153,7 +153,6 @@ class StudentControllerTest {
         assertNotNull(updatedStudent);
         assertThat(updatedStudent.getId()).isEqualTo(createdStudent.getId());
         assertThat(updatedStudent.getName()).isEqualTo("Bob");
-
     }
 
     @Test
