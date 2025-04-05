@@ -80,4 +80,8 @@ public class Faculty {
     public Collection<Student> getStudents() {
         return students;
     }
+
+    public void setStudents(Collection<Student> students) {
+        this.students = students;
+    }
 }

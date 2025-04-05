@@ -19,11 +19,9 @@ import java.util.NoSuchElementException;
 public class FacultyController {
 
     private final FacultyService facultyService;
-    private final StudentService studentService;
 
-    public FacultyController(FacultyService facultyService, StudentService studentService) {
+    public FacultyController(FacultyService facultyService) {
         this.facultyService = facultyService;
-        this.studentService = studentService;
     }
 
     @GetMapping("{id}")

@@ -1,4 +1,4 @@
-package ru.hogwarts.school;
+package ru.hogwarts.school.TestRestTemplate;
 
 
 import org.junit.jupiter.api.AfterEach;
@@ -49,7 +49,7 @@ class StudentControllerTest {
     }
 
     @Test
-    public void testPostStudent() throws Exception {
+    public void postStudentTest() throws Exception {
         Student studentForPost = new Student();
         studentForPost.setName("Alice");
         studentForPost.setAge(20);
@@ -61,7 +61,7 @@ class StudentControllerTest {
     }
 
     @Test
-    public void testGetStudentInfo() throws Exception {
+    public void getStudentInfo() throws Exception {
         Student studentForGet = new Student();
         studentForGet.setName("Alice");
         studentForGet.setAge(20);
@@ -79,7 +79,7 @@ class StudentControllerTest {
     }
 
     @Test
-    void testFindStudentsByAge() {
+    void getStudentsByAgeTest() {
         Student student_1 = new Student();
         student_1.setName("Alice");
         student_1.setAge(20);
@@ -103,7 +103,7 @@ class StudentControllerTest {
     }
 
     @Test
-    void testGetFacultyByStudentId() throws Exception {
+    void getFacultyByStudentIdTest() throws Exception {
         Faculty faculty = new Faculty();
         faculty.setName("Gryffindor");
         faculty.setColor("Red");
@@ -136,7 +136,7 @@ class StudentControllerTest {
     }
 
     @Test
-    void testEditStudent() throws Exception {
+    void editStudentTest() throws Exception {
         Student studentForEdit = new Student();
         studentForEdit.setName("Bob");
         studentForEdit.setAge(20);
@@ -157,7 +157,7 @@ class StudentControllerTest {
     }
 
     @Test
-    public void testDeleteUser() throws Exception {
+    public void deleteUserTest() throws Exception {
         Student studentForDelete = new Student();
         studentForDelete.setName("Vlad");
         studentForDelete.setAge(12);
