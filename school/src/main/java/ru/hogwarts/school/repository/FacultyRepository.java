@@ -10,5 +10,7 @@ public interface FacultyRepository extends JpaRepository<Faculty, Long> {
 
     List<Faculty> findByNameIgnoreCase(String name);
 
-    void deleteAllInBatch();
+    List<Faculty> findByColorIgnoreCaseAndNameIgnoreCase(String name, String color);
+
+    void deleteAll();
 }

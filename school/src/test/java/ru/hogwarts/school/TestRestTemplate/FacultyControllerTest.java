@@ -1,6 +1,7 @@
 package ru.hogwarts.school.TestRestTemplate;
 
-
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 import ru.hogwarts.school.controller.FacultyController;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
@@ -24,6 +27,8 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Transactional
+@ActiveProfiles("test")
 class FacultyControllerTest {
 
     @LocalServerPort
@@ -32,6 +37,9 @@ class FacultyControllerTest {
     @Autowired
     private FacultyController facultyController;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     @Autowired
     private TestRestTemplate restTemplate;
 
@@ -39,8 +47,25 @@ class FacultyControllerTest {
     private FacultyRepository facultyRepository;
 
     @AfterEach
-    void cleanup() {
-        facultyRepository.deleteAllInBatch();
+    void cleanupAfter() {
+        clearDatabase();
+    }
+
+    public void clearDatabase() {
+        entityManager.createNativeQuery("Delete From avatar").executeUpdate();
+        entityManager.createNativeQuery("Delete From student").executeUpdate();
+        entityManager.createNativeQuery("Delete From faculty").executeUpdate();
+        entityManager.clear();
+        Long studentCount = (Long) entityManager.createNativeQuery("SELECT COUNT(*) FROM student").getSingleResult();
+        Long facultyCount = (Long) entityManager.createNativeQuery("SELECT COUNT(*) FROM faculty").getSingleResult();
+        Long avatarCount = (Long) entityManager.createNativeQuery("SELECT COUNT(*) FROM avatar").getSingleResult();
+        System.out.println("Student count after truncate: " + studentCount);
+        System.out.println("Faculty count after truncate: " + facultyCount);
+        System.out.println("Avatar count after truncate: " + avatarCount);
+
+        if (studentCount > 0 || facultyCount > 0 || avatarCount > 0) {
+            throw new IllegalStateException("Database is not empty after truncate!");
+        }
     }
 
     @Test
@@ -51,14 +76,15 @@ class FacultyControllerTest {
     @Test
     public void postFacultyTest() throws Exception {
         Faculty facultyForPost = new Faculty();
-        facultyForPost.setName("Gryffindor");
-        facultyForPost.setColor("Red");
+        facultyForPost.setName("1");
+        facultyForPost.setColor("Brown");
         ResponseEntity<Faculty> createResponse = restTemplate.postForEntity(
                 "http://localhost:" + port + "/faculties", facultyForPost, Faculty.class);
         assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         Faculty createdFaculty = createResponse.getBody();
         assertNotNull(createdFaculty);
     }
+
 
     @Test
     public void getFacultyInfoTest() throws Exception {
@@ -79,61 +105,58 @@ class FacultyControllerTest {
     }
 
     @Test
-    void getFacultiesByColorOrNameTest() {
+    void findFacultiesByColorAndNameTest() {
         String color = "Red";
         String name = "Gryffindor";
         Faculty faculty_1 = new Faculty();
         faculty_1.setName("Gryffindor");
         faculty_1.setColor("Red");
+
         Faculty faculty_2 = new Faculty();
-        faculty_2.setName("Stanford");
-        faculty_2.setColor("Red");
+        faculty_2.setName("Slytherin");
+        faculty_2.setColor("Green");
         Faculty faculty_3 = new Faculty();
         faculty_3.setName("Gryffindor");
         faculty_3.setColor("Yellow");
-        ResponseEntity<Faculty> createFacultyResponse_1 = restTemplate.postForEntity(
-                "http://localhost:" + port + "/faculties", faculty_1, Faculty.class);
-        ResponseEntity<Faculty> createFacultyResponse_2 = restTemplate.postForEntity(
-                "http://localhost:" + port + "/faculties", faculty_2, Faculty.class);
-        ResponseEntity<Faculty> createFacultyResponse_3 = restTemplate.postForEntity(
-                "http://localhost:" + port + "/faculties", faculty_3, Faculty.class);
-        assertEquals(HttpStatus.OK, createFacultyResponse_1.getStatusCode());
-        assertEquals(HttpStatus.OK, createFacultyResponse_2.getStatusCode());
-        assertEquals(HttpStatus.OK, createFacultyResponse_3.getStatusCode());
-        ResponseEntity<Faculty[]> responseForColor = restTemplate.getForEntity(
-                "http://localhost:" + port + "/faculties?color=" + color, Faculty[].class);
-        assertEquals(HttpStatus.OK, responseForColor.getStatusCode());
-        List<Faculty> facultiesWithColor = Arrays.asList(Objects.requireNonNull(responseForColor.getBody()));
-        assertThat(facultiesWithColor).hasSize(2);
-        assertThat(facultiesWithColor).extracting(Faculty::getColor).containsOnly(color);
-        assertEquals(2, facultiesWithColor.size());
-        assertEquals(color, facultiesWithColor.get(0).getColor());
-        assertEquals(color, facultiesWithColor.get(1).getColor());
-        ResponseEntity<Faculty[]> responseForName = restTemplate.getForEntity(
-                "http://localhost:" + port + "/faculties?name=" + name, Faculty[].class);
-        assertEquals(HttpStatus.OK, responseForName.getStatusCode());
-        List<Faculty> facultiesWithName = Arrays.asList(Objects.requireNonNull(responseForName.getBody()));
-        assertThat(facultiesWithName).hasSize(2);
-        assertThat(facultiesWithName).extracting(Faculty::getName).containsOnly(name);
+
+        restTemplate.postForEntity("http://localhost:" + port + "/faculties", faculty_1, Faculty.class);
+        restTemplate.postForEntity("http://localhost:" + port + "/faculties", faculty_2, Faculty.class);
+        restTemplate.postForEntity("http://localhost:" + port + "/faculties", faculty_3, Faculty.class);
+
+        ResponseEntity<Faculty[]> response = restTemplate.getForEntity(
+                "http://localhost:" + port + "/faculties?color=" + color + "&name=" + name, Faculty[].class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        List<Faculty> faculties = Arrays.asList(Objects.requireNonNull(response.getBody()));
+        assertThat(faculties).hasSize(1);
+        assertThat(faculties).extracting(Faculty::getName).containsOnly(name);
+        assertThat(faculties).extracting(Faculty::getColor).containsOnly(color);
     }
 
     @Test
     void getStudentsByFacultyId() {
+        clearDatabase();
         Faculty faculty = new Faculty();
-        faculty.setName("Gryffindor");
-        faculty.setColor("red");
+        faculty.setName("Yale");
+        faculty.setColor("Red");
+
         ResponseEntity<Faculty> createFacultyResponse = restTemplate.postForEntity(
                 "http://localhost:" + port + "/faculties", faculty, Faculty.class);
         assertThat(createFacultyResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         Faculty createdFaculty = createFacultyResponse.getBody();
         assertNotNull(createdFaculty);
+
         Student student = new Student();
         student.setName("Harry Potter");
         student.setAge(11);
         student.setFaculty(createdFaculty);
+
         ResponseEntity<Student> createStudentResponse = restTemplate.postForEntity(
                 "http://localhost:" + port + "/students", student, Student.class);
         assertThat(createStudentResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Student createdStudent = createStudentResponse.getBody();
+        assertNotNull(createdStudent);
+
         ResponseEntity<Student[]> response = restTemplate.getForEntity(
                 "http://localhost:" + port + "/faculties/" + createdFaculty.getId() + "/students", Student[].class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);

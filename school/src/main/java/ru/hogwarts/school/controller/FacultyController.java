@@ -32,14 +32,19 @@ public class FacultyController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Faculty>> findFaculties(@RequestParam(required = false) String color, @RequestParam(required = false) String name) {
-        if (color != null && !color.isBlank()) {
+    public ResponseEntity<List<Faculty>> findFaculties(
+            @RequestParam(required = false) String color,
+            @RequestParam(required = false) String name) {
+
+        if (color != null && !color.isBlank() && name != null && !name.isBlank()) {
+            return ResponseEntity.ok(facultyService.findByNameAndColor(color, name));
+        } else if (color != null && !color.isBlank()) {
             return ResponseEntity.ok(facultyService.findByColor(color));
-        }
-        if (name != null && !name.isBlank()) {
+        } else if (name != null && !name.isBlank()) {
             return ResponseEntity.ok(facultyService.findByName(name));
+        } else {
+            return ResponseEntity.ok(Collections.emptyList());
         }
-        return ResponseEntity.ok(Collections.emptyList());
     }
 
     @GetMapping("/{facultyId}/students")

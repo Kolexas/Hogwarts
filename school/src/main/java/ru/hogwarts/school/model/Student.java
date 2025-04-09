@@ -17,10 +17,12 @@ public class Student {
     private String name;
     private int age;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne
     @JoinColumn(name = "faculty_id")
-
     private Faculty faculty;
+
+    @OneToOne(mappedBy = "student")
+    private Avatar avatar;
 
     public Student() {
     }

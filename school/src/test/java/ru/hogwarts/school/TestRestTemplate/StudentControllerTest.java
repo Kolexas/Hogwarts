@@ -1,7 +1,9 @@
 package ru.hogwarts.school.TestRestTemplate;
 
 
-import org.junit.jupiter.api.AfterEach;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,18 +14,19 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 import ru.hogwarts.school.controller.StudentController;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.StudentRepository;
-
 import java.util.List;
 import java.util.Objects;
-
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
+@Transactional
 class StudentControllerTest {
 
     @LocalServerPort
@@ -32,17 +35,35 @@ class StudentControllerTest {
     @Autowired
     private StudentController studentController;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     @Autowired
     private TestRestTemplate restTemplate;
 
     @Autowired
     private StudentRepository studentRepository;
 
-    @AfterEach
+    @BeforeEach
     void cleanup() {
-        studentRepository.deleteAllInBatch();
+        clearDatabase();
     }
+    public void clearDatabase() {
+        entityManager.createNativeQuery("Delete From avatar").executeUpdate();
+        entityManager.createNativeQuery("Delete From student").executeUpdate();
+        entityManager.createNativeQuery("Delete From faculty").executeUpdate();
+        entityManager.clear();
+        Long studentCount = (Long) entityManager.createNativeQuery("SELECT COUNT(*) FROM student").getSingleResult();
+        Long facultyCount = (Long) entityManager.createNativeQuery("SELECT COUNT(*) FROM faculty").getSingleResult();
+        Long avatarCount = (Long) entityManager.createNativeQuery("SELECT COUNT(*) FROM avatar").getSingleResult();
+        System.out.println("Student count after truncate: " + studentCount);
+        System.out.println("Faculty count after truncate: " + facultyCount);
+        System.out.println("Avatar count after truncate: " + avatarCount);
 
+        if (studentCount > 0 || facultyCount > 0 || avatarCount > 0) {
+            throw new IllegalStateException("Database is not empty after truncate!");
+        }
+    }
     @Test
     void contextLoads() throws Exception {
         assertThat(studentController).isNotNull();
@@ -52,19 +73,18 @@ class StudentControllerTest {
     public void postStudentTest() throws Exception {
         Student studentForPost = new Student();
         studentForPost.setName("Alice");
-        studentForPost.setAge(20);
+        studentForPost.setAge(14);
         ResponseEntity<Student> createResponse = restTemplate.postForEntity(
                 "http://localhost:" + port + "/students", studentForPost, Student.class);
         assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         Student createdStudent = createResponse.getBody();
         assertNotNull(createdStudent);
     }
-
     @Test
     public void getStudentInfo() throws Exception {
         Student studentForGet = new Student();
-        studentForGet.setName("Alice");
-        studentForGet.setAge(20);
+        studentForGet.setName("Max");
+        studentForGet.setAge(15);
         ResponseEntity<Student> createResponse = restTemplate.postForEntity(
                 "http://localhost:" + port + "/students", studentForGet, Student.class);
         Student createdStudent = createResponse.getBody();
@@ -81,14 +101,14 @@ class StudentControllerTest {
     @Test
     void getStudentsByAgeTest() {
         Student student_1 = new Student();
-        student_1.setName("Alice");
-        student_1.setAge(20);
+        student_1.setName("Vlad");
+        student_1.setAge(16);
         Student student_2 = new Student();
         student_2.setName("Maxim");
         student_2.setAge(20);
         Student student_3 = new Student();
         student_3.setName("Vladimir");
-        student_3.setAge(22);
+        student_3.setAge(20);
         restTemplate.postForEntity("http://localhost:" + port + "/students", student_1, Student.class);
         restTemplate.postForEntity("http://localhost:" + port + "/students", student_2, Student.class);
         restTemplate.postForEntity("http://localhost:" + port + "/students", student_3, Student.class);
@@ -105,8 +125,8 @@ class StudentControllerTest {
     @Test
     void getFacultyByStudentIdTest() throws Exception {
         Faculty faculty = new Faculty();
-        faculty.setName("Gryffindor");
-        faculty.setColor("Red");
+        faculty.setName("University of Pennsylvania");
+        faculty.setColor("Lavender");
         ResponseEntity<Faculty> createFacultyResponse = restTemplate.postForEntity(
                 "http://localhost:" + port + "/faculties", faculty, Faculty.class);
         assertThat(createFacultyResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -115,7 +135,6 @@ class StudentControllerTest {
         String facultyColor = createFacultyResponse.getBody().getColor();
         Student student123 = new Student();
         student123.setName("Harry Potter");
-        student123.setAge(11);
         faculty.setId(facultyId);
         faculty.setName(facultyName);
         faculty.setColor(facultyColor);
@@ -139,7 +158,7 @@ class StudentControllerTest {
     void editStudentTest() throws Exception {
         Student studentForEdit = new Student();
         studentForEdit.setName("Bob");
-        studentForEdit.setAge(20);
+        studentForEdit.setAge(32);
         ResponseEntity<Student> createResponse = restTemplate.postForEntity(
                 "http://localhost:" + port + "/students", studentForEdit, Student.class);
         assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -158,7 +177,7 @@ class StudentControllerTest {
     @Test
     public void deleteUserTest() throws Exception {
         Student studentForDelete = new Student();
-        studentForDelete.setName("Vlad");
+        studentForDelete.setName("Perry");
         studentForDelete.setAge(12);
         ResponseEntity<Student> createResponse = restTemplate.postForEntity(
                 "http://localhost:" + port + "/students", studentForDelete, Student.class);
