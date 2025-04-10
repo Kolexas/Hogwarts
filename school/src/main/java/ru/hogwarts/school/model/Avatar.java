@@ -8,7 +8,7 @@ import java.util.Objects;
 @Entity
 public class Avatar {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String filePath;
@@ -20,6 +20,7 @@ public class Avatar {
     private byte[] data;
 
     @OneToOne
+    @JoinColumn(name = "student_id")
     private Student student;
 
     public Avatar() {

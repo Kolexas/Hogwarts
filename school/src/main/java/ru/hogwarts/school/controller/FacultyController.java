@@ -1,13 +1,11 @@
 package ru.hogwarts.school.controller;
 
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.FacultyService;
-import ru.hogwarts.school.service.StudentService;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -19,11 +17,9 @@ import java.util.NoSuchElementException;
 public class FacultyController {
 
     private final FacultyService facultyService;
-    private final StudentService studentService;
 
-    public FacultyController(FacultyService facultyService, StudentService studentService) {
+    public FacultyController(FacultyService facultyService) {
         this.facultyService = facultyService;
-        this.studentService = studentService;
     }
 
     @GetMapping("{id}")
@@ -36,14 +32,19 @@ public class FacultyController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Faculty>> findFaculties(@RequestParam(required = false) String color, @RequestParam(required = false) String name) {
-        if (color != null && !color.isBlank()) {
+    public ResponseEntity<List<Faculty>> findFaculties(
+            @RequestParam(required = false) String color,
+            @RequestParam(required = false) String name) {
+
+        if (color != null && !color.isBlank() && name != null && !name.isBlank()) {
+            return ResponseEntity.ok(facultyService.findByNameAndColor(color, name));
+        } else if (color != null && !color.isBlank()) {
             return ResponseEntity.ok(facultyService.findByColor(color));
-        }
-        if (name != null && !name.isBlank()) {
+        } else if (name != null && !name.isBlank()) {
             return ResponseEntity.ok(facultyService.findByName(name));
+        } else {
+            return ResponseEntity.ok(Collections.emptyList());
         }
-        return ResponseEntity.ok(Collections.emptyList());
     }
 
     @GetMapping("/{facultyId}/students")

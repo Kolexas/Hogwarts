@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.3'
 	id 'io.spring.dependency-management' version '1.1.7'
+
 }
 
 group = 'ru.hogwarts'
@@ -26,8 +27,9 @@ dependencies {
 	implementation('org.postgresql:postgresql:42.7.2')
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.hibernate.validator:hibernate-validator")
+	implementation 'com.h2database:h2'
+	testImplementation 'com.h2database:h2'
 }
-
 tasks.named('test') {
 	useJUnitPlatform()
 }

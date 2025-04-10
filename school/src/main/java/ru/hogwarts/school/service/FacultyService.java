@@ -5,12 +5,14 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.FacultyRepository;
 
 @Service
+@Transactional
 public class FacultyService {
 
     private final FacultyRepository facultyRepository;
@@ -24,7 +26,7 @@ public class FacultyService {
     }
 
     public Faculty findFaculty(long id) {
-        return facultyRepository.findById(id).get();
+        return facultyRepository.findById(id).orElse(null);
     }
 
     public Faculty editFaculty(Faculty faculty) {
@@ -41,6 +43,10 @@ public class FacultyService {
 
     public List<Faculty> findByName(String name) {
         return facultyRepository.findByNameIgnoreCase(name);
+    }
+
+    public List<Faculty> findByNameAndColor(String name, String color) {
+        return facultyRepository.findByColorIgnoreCaseAndNameIgnoreCase(name, color);
     }
 
     public Collection<Student> getStudentsByFacultyId(Long facultyId) {
