@@ -50,6 +50,22 @@ public class StudentController {
         return ResponseEntity.ok(faculty);
     }
 
+    @GetMapping("/total")
+    public Integer getStudentsNumber() {
+        return studentService.getStudentsNumber();
+    }
+
+    @GetMapping("/avgAge")
+    public Integer getStudentsAverageAge() {
+        return studentService.getStudentsAverageAge();
+    }
+
+    @GetMapping("/BottomFive")
+    public List<Student> getBottomFiveStudents() {
+        return studentService.getBottomFiveStudents();
+    }
+
+
     @PostMapping
     public Student createStudent(@RequestBody Student student) {
         return studentService.addStudent(student);

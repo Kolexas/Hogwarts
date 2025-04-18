@@ -30,7 +30,6 @@ public class StudentService {
         return studentRepository.save(student);
     }
 
-
     public void deleteStudent(long id) {
         studentRepository.deleteById(id);
     }
@@ -49,6 +48,18 @@ public class StudentService {
             return null;
         }
         return student.getFaculty();
+    }
+
+    public Integer getStudentsNumber() {
+        return studentRepository.getStudentsNumber();
+    }
+
+    public Integer getStudentsAverageAge() {
+        return studentRepository.getStudentsAverageAge();
+    }
+
+    public List<Student> getBottomFiveStudents() {
+        return studentRepository.GetBottomFiveStudents();
     }
 }
 
