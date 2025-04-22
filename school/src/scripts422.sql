@@ -6,7 +6,8 @@ Create TABLE Owner (
  );
 
  Create TABLE car (
- car_id SERIAL Primary KEY REFERENCES owner(owner_id),
+ owner_id INTEGER REFERENCES Owner(owner_id),
+ car_id SERIAL Primary KEY,
  car_brand TEXT,
  model TEXT,
  cost INTEGER
