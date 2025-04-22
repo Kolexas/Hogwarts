@@ -1,0 +1,12 @@
+ALTER TABLE student
+ADD CONSTRAINT age_constraint CHECK (age>16);
+
+ALTER TABLE student
+ADD CONSTRAINT SET UNIQUE NOT NULL;
+
+
+ALTER TABLE faculty
+ADD CONSTRAINT unique_name_color SET UNIQUE(name,color) ;
+
+ALTER TABLE student
+ADD CONSTRAINT age SET DEFAULT 20;
