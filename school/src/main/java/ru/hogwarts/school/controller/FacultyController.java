@@ -35,7 +35,6 @@ public class FacultyController {
     public ResponseEntity<List<Faculty>> findFaculties(
             @RequestParam(required = false) String color,
             @RequestParam(required = false) String name) {
-
         if (color != null && !color.isBlank() && name != null && !name.isBlank()) {
             return ResponseEntity.ok(facultyService.findByNameAndColor(color, name));
         } else if (color != null && !color.isBlank()) {
