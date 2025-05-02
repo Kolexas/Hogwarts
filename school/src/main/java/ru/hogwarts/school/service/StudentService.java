@@ -1,6 +1,9 @@
 package ru.hogwarts.school.service;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 
 import jakarta.transaction.Transactional;
@@ -73,6 +76,21 @@ public class StudentService {
     public List<Student> getBottomFiveStudents() {
         logger.info("Was invoked method for getting five bottom students");
         return studentRepository.GetBottomFiveStudents();
+    }
+
+    public  List<Student> getAllStudents() {
+        logger.info("Was invoked method for getting all students");
+        return studentRepository.findAll().stream()
+                .sorted(Comparator.comparing(student -> student.getName().toUpperCase()))
+                .collect(Collectors.toList());
+    }
+
+    public int getAverageAge() {
+        logger.info("Getting average age of students");
+        return (int) studentRepository.findAll().stream()
+                .mapToInt(Student::getAge)
+                .average()
+                .orElse(0);
     }
 }
 

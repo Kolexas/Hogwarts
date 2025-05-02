@@ -64,7 +64,14 @@ public class StudentController {
     public List<Student> getBottomFiveStudents() {
         return studentService.getBottomFiveStudents();
     }
-
+    @GetMapping("/getAll")
+    public List<Student> getAll() {
+        return studentService.getAllStudents();
+    }
+    @GetMapping("/avgAgeAll")
+    public int getAverageAgeAll() {
+        return studentService.getAverageAge();
+    }
 
     @PostMapping
     public Student createStudent(@RequestBody Student student) {
