@@ -1,8 +1,10 @@
 package ru.hogwarts.school.service;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.LongStream;
 
 
 import jakarta.transaction.Transactional;
@@ -67,5 +69,22 @@ public class FacultyService {
                     return new NoSuchElementException();
                 });
         return faculty.getStudents();
+    }
+
+    public String getLongName() {
+        return facultyRepository.findAll().stream()
+                .map(Faculty::getName)
+                .max(Comparator.comparing(String::length))
+                .orElse(null);
+    }
+
+    public long getNumber() {
+        long startTime = System.currentTimeMillis();
+        long sum = LongStream.rangeClosed(1, 1_000_000)
+                .parallel()
+                .reduce(0, Long::sum);
+        long endTime = System.currentTimeMillis();
+        System.out.println("Time taken (parallel): " + (endTime - startTime) + " ms");
+        return sum;
     }
 }

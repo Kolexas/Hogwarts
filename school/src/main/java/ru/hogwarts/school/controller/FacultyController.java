@@ -56,6 +56,16 @@ public class FacultyController {
         }
     }
 
+    @GetMapping("/getLongest")
+    public String getLongestName() {
+       return facultyService.getLongName();
+    }
+
+    @GetMapping("/getNumber")
+    public long getNumber() {
+        return facultyService.getNumber();
+    }
+
     @PostMapping
     public Faculty createFaculty(@RequestBody Faculty faculty) {
         return facultyService.addFaculty(faculty);
