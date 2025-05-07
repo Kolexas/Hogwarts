@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.hogwarts.school.controller.StudentController;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
@@ -117,6 +118,21 @@ public class StudentControllerWebMvcTest {
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Gryffindor"))
                 .andExpect(jsonPath("$.color").value("Red"));
+    }
+    @Test
+    public void getStudentParallel_shouldReturnOkAndCallServiceMethod() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/students/print-parallel")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    public void getStudentParallelSync_shouldReturnOkAndCallServiceMethod() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/students/print-synchronized")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
