@@ -153,6 +153,19 @@ class StudentControllerTest {
         assertThat(retrievedFaculty.getName()).isEqualTo(faculty.getName());
         assertThat(retrievedFaculty.getColor()).isEqualTo(faculty.getColor());
     }
+    @Test
+    public void getStudentParallel_Ok() {
+        String url = "http://localhost:" + port + "/students/print-parallel";
+        ResponseEntity<Void> response = restTemplate.getForEntity(url, Void.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    public void getStudentParallelSync_Ok() {
+        String url = "http://localhost:" + port + "/students/print-synchronized";
+        ResponseEntity<Void> response = restTemplate.getForEntity(url, Void.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
 
     @Test
     void editStudentTest() throws Exception {

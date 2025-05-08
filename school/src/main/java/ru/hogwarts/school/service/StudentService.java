@@ -78,7 +78,7 @@ public class StudentService {
         return studentRepository.GetBottomFiveStudents();
     }
 
-    public  List<Student> getAllStudents() {
+    public List<Student> getAllStudents() {
         logger.info("Was invoked method for getting all students");
         return studentRepository.findAll().stream()
                 .sorted(Comparator.comparing(student -> student.getName().toUpperCase()))
@@ -91,6 +91,41 @@ public class StudentService {
                 .mapToInt(Student::getAge)
                 .average()
                 .orElse(0);
+    }
+
+    public void getStudentParallel() {
+        logger.info("Getting student parallel");
+        System.out.println(studentRepository.findById(1L));
+        System.out.println(studentRepository.findById(2L));
+        new Thread(() -> {
+            System.out.println(studentRepository.findById(3L));
+            System.out.println(studentRepository.findById(4L));
+        }).start();
+        new Thread(() -> {
+            System.out.println(studentRepository.findById(5L));
+            System.out.println(studentRepository.findById(6L));
+        }).start();
+    }
+
+    public void getStudentParallelSync() {
+        logger.info("Getting student parallelSync");
+        printSync(1L);
+        printSync(2L);
+        new Thread(() -> {
+            printSync(3L);
+            printSync(4L);
+        }).start();
+        new Thread(() -> {
+            printSync(5L);
+            printSync(6L);
+        }).start();
+    }
+
+    public void printSync(Long studentId) {
+        synchronized (studentRepository) {
+            Student student = studentRepository.findById(studentId).orElse(null);
+            System.out.println(student);
+        }
     }
 }
 
